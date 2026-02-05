@@ -83,13 +83,6 @@
         }
 
         /* スタート画面 */
-        .hero-img {
-            width: 80%;
-            max-width: 300px;
-            margin: 20px auto;
-            border-radius: 15px;
-        }
-
         .intro-text {
             font-size: 1.1rem;
             line-height: 1.6;
@@ -289,6 +282,14 @@
 </div>
 
 <script>
+    /* ================================================================
+       【重要】ここにGoogle Apps Script (Webアプリ) のURLを貼り付けてください
+       ================================================================ 
+    */
+    const GOOGLE_SCRIPT_URL = "ここにさっきのURLを貼る"; 
+    // ↑↑ 例: "https://script.google.com/macros/s/xxxxxxxxx/exec"
+
+
     /* ============================
        データ設定
        ============================ */
@@ -306,7 +307,7 @@
         I: { name: "コミュニティのハブ", major: "地域共創学群（地域）", desc: "ファン同士や地域との繋がりを大切にする。人と協力して新しい価値を作るサツダイの学びそのもの！" }
     };
 
-    // 質問データ（選択肢ごとに加算するタイプを指定）
+    // 質問データ
     const questions = [
         {
             text: "Q1. 推しの魅力を友達に「布教」するとき、どうする？",
@@ -416,10 +417,6 @@
         const optionsContainer = document.getElementById('options-grid');
         optionsContainer.innerHTML = '';
 
-        // シャッフルしたい場合はここでoptionsをランダムソートするが、
-        // 今回は定義順（A~Iの順だとバレやすいので、本番実装ではシャッフル推奨）
-        // ここでは簡易的にそのまま表示します
-        
         q.options.forEach((opt, index) => {
             const btn = document.createElement('button');
             btn.className = 'option-btn';
@@ -431,8 +428,6 @@
 
     // 回答処理
     function answer(type) {
-        // 選んだタイプに加点 (+2点)
-        // 少しランダム性を入れるために 0.1〜0.9 の乱数を足して同点回避
         scores[type] += 2 + Math.random();
 
         currentQuestionIndex++;
@@ -443,7 +438,7 @@
         }
     }
 
-    // 結果計算・表示
+    // 結果計算・表示・送信
     function calcResults() {
         // スコア順にソート（降順）
         const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
@@ -467,7 +462,6 @@
             const rankClass = medals[index];
             const rankIcon = medalIcons[index];
             
-            // コード生成
             codeStr += (index === 0 ? "" : "-") + typeKey;
 
             const div = document.createElement('div');
@@ -496,6 +490,39 @@
         document.querySelector('.copy').setAttribute('data-text', shareText);
 
         showScreen('result-screen');
+
+        // ★★★ スプレッドシートへ送信 ★★★
+        sendToSheet(top3, codeStr, scores);
+    }
+
+    // スプレッドシート送信関数
+    function sendToSheet(top3, staffCode, allScores) {
+        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === "ここにさっきのURLを貼る") {
+            console.warn("GASのURLが設定されていません");
+            return;
+        }
+
+        const data = {
+            rank1: types[top3[0][0]].name + "(" + types[top3[0][0]].major + ")",
+            rank2: types[top3[1][0]].name + "(" + types[top3[1][0]].major + ")",
+            rank3: types[top3[2][0]].name + "(" + types[top3[2][0]].major + ")",
+            staffCode: staffCode,
+            fullData: JSON.stringify(allScores)
+        };
+
+        // no-corsモードで送信（画面遷移せず裏側で送るため）
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }).then(() => {
+            console.log("Data sent to sheet");
+        }).catch(err => {
+            console.error("Error sending data:", err);
+        });
     }
 
     // クリップボードコピー
