@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>推し活×サツダイ メジャー診断 | 札幌大学</title>
+    <style>
+        /* デザイン設定 */
+        :root {
+            --primary-color: #00A0E9; /* サツダイブルー系 */
+            --accent-color: #FF6B9D; /* 推し活ピンク */
+            --bg-color: #F0F8FF;
+            --text-color: #333;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 各画面の共通スタイル */
+        .screen {
+            padding: 30px 20px;
+            flex: 1;
+            display: none; /* 初期状態は非表示 */
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, var(--primary-color), #5bc0de);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* スタート画面 */
+        .hero-img {
+            width: 80%;
+            max-width: 300px;
+            margin: 20px auto;
+            border-radius: 15px;
+        }
+
+        .intro-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        /* 質問画面 */
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #eee;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-align: left;
+            width: 100%;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #eee;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary-color);
+            background: #f9f9ff;
+        }
+
+        /* 結果画面 */
+        .result-rank {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .rank-item {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            text-align: left;
+            border-left: 8px solid var(--primary-color);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .rank-item.gold { border-color: #FFD700; background: #FFFDF0; }
+        .rank-item.silver { border-color: #C0C0C0; }
+        .rank-item.bronze { border-color: #CD7F32; }
+
+        .rank-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        .gold .rank-badge { background: #FFD700; color: #555; }
+        .silver .rank-badge { background: #C0C0C0; }
+        .bronze .rank-badge { background: #CD7F32; }
+
+        .major-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .type-name {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .desc-text {
+            font-size: 0.95rem;
+            color: #555;
+            margin-top: 5px;
+            line-height: 1.5;
+        }
+
+        .staff-code-box {
+            background: #333;
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+            width: 90%;
+        }
+        .staff-code {
+            font-size: 2.5rem;
+            font-weight: bold;
+            letter-spacing: 5px;
+            color: #00FF00;
+        }
+
+        .sns-area {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+        .sns-btn {
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+        }
+        .twitter { background: #000; }
+        .copy { background: #888; }
+
+        /* フッター */
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            font-size: 0.8rem;
+            color: #888;
+            background: #f1f1f1;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="start-screen" class="screen active">
+        <h1>推し活 × サツダイ<br>メジャー診断</h1>
+        <p class="intro-text">
+            あなたの「推し活スタイル」から<br>
+            才能が輝く専攻が見つかる！<br><br>
+            サツダイは1年次は専攻を決めずに<br>色々学べる「地域共創学群」。<br>
+            2年次にどの専攻を選ぶと最強になれるか<br>
+            AIロジックで分析します！
+        </p>
+        <button class="btn" onclick="startQuiz()">診断スタート！</button>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+        <div id="question-text" class="question-text"></div>
+        <div id="options-grid" class="options-grid"></div>
+    </div>
+
+    <div id="result-screen" class="screen">
+        <h2>🎉 診断結果 🎉</h2>
+        <p>あなたの才能が開花する<br>学びのベスト3はこれだ！</p>
+        
+        <div id="ranking-container" class="result-rank">
+            </div>
+
+        <div class="staff-code-box">
+            <p style="margin:0; font-size:0.8rem;">スタッフ提示用コード</p>
+            <div id="staff-code" class="staff-code"></div>
+            <p style="margin:0; font-size:0.8rem;">※この画面をスタッフに見せてね！</p>
+        </div>
+
+        <div class="sns-area">
+            <a id="twitter-share" href="#" target="_blank" class="sns-btn twitter">𝕏 でポスト</a>
+            <button onclick="copyResult()" class="sns-btn copy">結果をコピー（インスタ用）</button>
+        </div>
+        
+        <button class="btn" onclick="location.reload()">もう一度診断する</button>
+    </div>
+    
+    <footer>
+        &copy; Sapporo University Open Campus
+    </footer>
+</div>
+
+<script>
+    /* ============================
+       データ設定
+       ============================ */
+    
+    // 9つのタイプ定義
+    const types = {
+        A: { name: "言語化の魔術師", major: "日本語・日本文化専攻", desc: "言葉で推しを表現する天才。文学や文化を学ぶと、その表現力は最強の武器になる！" },
+        B: { name: "文脈の考古学者", major: "歴史文化専攻", desc: "推しの背景や歴史を深掘りする探究心。歴史の流れを学ぶことで、推しの世界がもっと鮮やかに！" },
+        C: { name: "国境なきオタク", major: "英語専攻", desc: "海外情報も逃さないグローバル視点。英語力を磨けば、推し活のフィールドは世界へ！" },
+        D: { name: "現場の司令塔", major: "スポーツ文化専攻", desc: "現場の熱量と一体感が大好き。身体文化やスポーツを学んで、感動を作る側に！" },
+        E: { name: "敏腕プロデューサー", major: "経営学専攻", desc: "推しをどう広めるか考える戦略家。マーケティングを学べば、バズらせる仕掛け人に！" },
+        F: { name: "コスパの鬼", major: "経済学専攻", desc: "数字とデータで推し活を分析。お金の流れや経済効果を学ぶと、推し活の裏側が見えてくる！" },
+        G: { name: "鉄壁の守護神", major: "法学専攻", desc: "ルールや権利を守る正義感。法律を知ることは、大好きな推しや界隈を守る力になる！" },
+        H: { name: "越境するマルチ才能", major: "リベラルアーツ専攻", desc: "ジャンルに縛られず多角的に楽しむ。多様な学問を組み合わせれば、独自の視点が手に入る！" },
+        I: { name: "コミュニティのハブ", major: "地域共創学群（地域）", desc: "ファン同士や地域との繋がりを大切にする。人と協力して新しい価値を作るサツダイの学びそのもの！" }
+    };
+
+    // 質問データ（選択肢ごとに加算するタイプを指定）
+    const questions = [
+        {
+            text: "Q1. 推しの魅力を友達に「布教」するとき、どうする？",
+            options: [
+                { label: "「この歌詞がヤバい」と熱文LINEを送る", type: "A" },
+                { label: "「ここまでの苦労が泣ける」と歴史を語る", type: "B" },
+                { label: "「海外でも人気なんだよ」と規模感を伝える", type: "C" },
+                { label: "「とにかくライブ映像見て！」と熱量を伝える", type: "D" },
+                { label: "相手の好みに合わせてプレゼン方法を変える", type: "E" },
+                { label: "「今ハマるとこれだけお得」とコスパを説く", type: "F" },
+                { label: "「公式動画だから安心して」と安全に導く", type: "G" },
+                { label: "「音楽も衣装も全部良い」と全体像を語る", type: "H" },
+                { label: "「ファンの雰囲気が良いよ」と仲間に誘う", type: "I" }
+            ]
+        },
+        {
+            text: "Q2. グッズ購入や遠征費、お財布事情はどうしてる？",
+            options: [
+                { label: "キャッチコピーや言葉に惹かれて買う", type: "A" },
+                { label: "ゆかりの地や伝統工芸コラボなら即決", type: "B" },
+                { label: "海外限定グッズや送料も厭わない", type: "C" },
+                { label: "現地に行くことが最大の投資！", type: "D" },
+                { label: "「これは投資だ」と割り切って戦略的に買う", type: "E" },
+                { label: "バイト代と支出を計算して計画的に使う", type: "F" },
+                { label: "転売NG！公式にしっかりお金を落とす", type: "G" },
+                { label: "気分によって柔軟に欲しいものを買う", type: "H" },
+                { label: "地元のコラボ店やイベント会場で買う", type: "I" }
+            ]
+        },
+        {
+            text: "Q3. 推しが「炎上」や「トラブル」に！どう動く？",
+            options: [
+                { label: "自分の言葉で推しへの愛を投稿する", type: "A" },
+                { label: "過去の事例や経緯を冷静に調べる", type: "B" },
+                { label: "海外の反応やニュースをチェックする", type: "C" },
+                { label: "変わらず現場に応援に行くと決める", type: "D" },
+                { label: "鎮火するためのポジティブな話題を拡散", type: "E" },
+                { label: "ファン離れや経済的影響を心配する", type: "F" },
+                { label: "事実確認し、誹謗中傷を通報する", type: "G" },
+                { label: "いろんな意見があることを受け止める", type: "H" },
+                { label: "ファン同士で励まし合い結束を固める", type: "I" }
+            ]
+        },
+        {
+            text: "Q4. もしあなたが「推しのマネージャー」になったら？",
+            options: [
+                { label: "泣けるキャッチコピーを考える", type: "A" },
+                { label: "ドキュメンタリー映画を作る", type: "B" },
+                { label: "世界ツアーを組んで海外進出！", type: "C" },
+                { label: "ドームなど大きな会場を押さえる", type: "D" },
+                { label: "SNSでバズる企画を連発する", type: "E" },
+                { label: "売上データを分析して次に活かす", type: "F" },
+                { label: "契約書をチェックして権利を守る", type: "G" },
+                { label: "推しの自由にやらせてあげる", type: "H" },
+                { label: "地元企業とコラボして盛り上げる", type: "I" }
+            ]
+        },
+        {
+            text: "Q5. 最後に！あなたにとって「推し活」とは？",
+            options: [
+                { label: "想いを「言語化」すること", type: "A" },
+                { label: "壮大な「物語」の一部になること", type: "B" },
+                { label: "世界を広げる「パスポート」", type: "C" },
+                { label: "生きてる実感！エネルギーの「交換」", type: "D" },
+                { label: "推しと共に成長する「プロジェクト」", type: "E" },
+                { label: "人生を豊かにする価値ある「投資」", type: "F" },
+                { label: "正しく愛し、ルールを守って「支える」", type: "G" },
+                { label: "好奇心の扉を開く「カギ」", type: "H" },
+                { label: "大切な居場所と仲間を作る「つながり」", type: "I" }
+            ]
+        }
+    ];
+
+    /* ============================
+       ロジック処理
+       ============================ */
+    
+    let currentQuestionIndex = 0;
+    // スコア初期化
+    let scores = { A:0, B:0, C:0, D:0, E:0, F:0, G:0, H:0, I:0 };
+
+    // 画面切り替え関数
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    // 診断スタート
+    function startQuiz() {
+        currentQuestionIndex = 0;
+        // スコアリセット
+        for (let key in scores) scores[key] = 0;
+        showScreen('quiz-screen');
+        renderQuestion();
+    }
+
+    // 質問描画
+    function renderQuestion() {
+        const q = questions[currentQuestionIndex];
+        
+        // 進捗バー更新
+        const progressPercent = ((currentQuestionIndex) / questions.length) * 100;
+        document.getElementById('progress-fill').style.width = progressPercent + '%';
+
+        document.getElementById('question-text').innerText = q.text;
+        
+        const optionsContainer = document.getElementById('options-grid');
+        optionsContainer.innerHTML = '';
+
+        // シャッフルしたい場合はここでoptionsをランダムソートするが、
+        // 今回は定義順（A~Iの順だとバレやすいので、本番実装ではシャッフル推奨）
+        // ここでは簡易的にそのまま表示します
+        
+        q.options.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt.label;
+            btn.onclick = () => answer(opt.type);
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    // 回答処理
+    function answer(type) {
+        // 選んだタイプに加点 (+2点)
+        // 少しランダム性を入れるために 0.1〜0.9 の乱数を足して同点回避
+        scores[type] += 2 + Math.random();
+
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            renderQuestion();
+        } else {
+            calcResults();
+        }
+    }
+
+    // 結果計算・表示
+    function calcResults() {
+        // スコア順にソート（降順）
+        const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+        
+        // 上位3つを取得
+        const top3 = sortedScores.slice(0, 3);
+        
+        // DOM生成
+        const container = document.getElementById('ranking-container');
+        container.innerHTML = '';
+        
+        const medals = ['gold', 'silver', 'bronze'];
+        const medalIcons = ['🥇 第1位', '🥈 第2位', '🥉 第3位'];
+        
+        // コード用文字列 (例: E-A-I)
+        let codeStr = "";
+
+        top3.forEach((item, index) => {
+            const typeKey = item[0];
+            const data = types[typeKey];
+            const rankClass = medals[index];
+            const rankIcon = medalIcons[index];
+            
+            // コード生成
+            codeStr += (index === 0 ? "" : "-") + typeKey;
+
+            const div = document.createElement('div');
+            div.className = `rank-item ${rankClass}`;
+            div.innerHTML = `
+                <span class="rank-badge">${rankIcon}</span>
+                <span class="major-name">${data.major}</span>
+                <div class="type-name">【${data.name}】タイプ</div>
+                <div class="desc-text">${data.desc}</div>
+            `;
+            container.appendChild(div);
+        });
+
+        // スタッフコード表示
+        document.getElementById('staff-code').innerText = codeStr;
+
+        // SNSシェア用テキスト作成
+        const topType = types[top3[0][0]];
+        const shareText = `推し活×サツダイ メジャー診断結果！\n私の推し活タイプは…\n👑【${topType.name}】\n(${topType.major})\n\n推し活の才能が学びに変わるかも！？\n#サツダイ #推し活診断 #札幌大学`;
+        
+        // Twitterリンク設定
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+        document.getElementById('twitter-share').href = twitterUrl;
+
+        // インスタ用コピーボタンにテキストを仕込む
+        document.querySelector('.copy').setAttribute('data-text', shareText);
+
+        showScreen('result-screen');
+    }
+
+    // クリップボードコピー
+    function copyResult() {
+        const text = document.querySelector('.copy').getAttribute('data-text');
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('テキストをコピーしました！\nInstagramを開いて貼り付けてね✨');
+            });
+        } else {
+            alert('コピーに失敗しました');
+        }
+    }
+
+</script>
+
+</body>
+</html>
